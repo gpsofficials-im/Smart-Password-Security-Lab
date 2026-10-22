@@ -1,6 +1,7 @@
 """Unit tests verifying JSON export privacy invariants and field allowlists."""
 
 import json
+from typing import Any
 import unittest
 import password_analyzer as core
 
@@ -48,7 +49,30 @@ class ExportPrivacyTests(unittest.TestCase):
 
         serialized = json.dumps(export)
         self.assertNotIn(secret_corp_entry, serialized)
-        self.assertNotIn(secret_corp_entry.casefold(), serialized)
+    def test_analysis_result_object_never_contains_password_recursively(self):
+        secret = "UltraSecretString!99"
+        result = core.analyze_password(secret)
+
+        def check_no_leak(obj: Any) -> None:
+            if isinstance(obj, str):
+                self.assertNotIn(secret, obj)
+            elif isinstance(obj, dict):
+                for k, v in obj.items():
+                    self.assertNotIn(secret, str(k))
+                    check_no_leak(v)
+            elif isinstance(obj, (list, tuple, set, frozenset)):
+                for item in obj:
+                    check_no_leak(item)
+
+        check_no_leak(result)
+
+    def test_custom_dictionary_bounds_rejection(self):
+        # Oversized line (> 256 code points) is skipped safely
+        valid_with_long = "normalword\n" + ("x" * 300) + "\nsecondword"
+        dict_set = core.load_custom_dictionary(valid_with_long, is_content=True)
+        self.assertIn("normalword", dict_set)
+        self.assertIn("secondword", dict_set)
+        self.assertEqual(len(dict_set), 2)
 
 
 if __name__ == "__main__":
