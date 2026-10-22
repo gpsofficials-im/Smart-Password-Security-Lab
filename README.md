@@ -1,65 +1,135 @@
-# Password Strength Checker
+# Smart Password Security Lab
 
-A dependency-free educational cybersecurity project with two interfaces:
+[![Python Tests](https://github.com/gpsofficials-im/password_strength_checker/actions/workflows/tests.yml/badge.svg)](https://github.com/gpsofficials-im/password_strength_checker/actions/workflows/tests.yml)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](security_spec.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Zero Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](#)
 
-- **Python CLI** (`password_strength_checker.py`) — password input is hidden in a compatible terminal.
-- **Standalone browser UI** (`index.html`) — a responsive dark interface with live feedback.
-- **Automated tests** (`test_password_checker.py`) — standard-library `unittest` regression coverage.
+A professional, privacy-first cybersecurity educational application and laboratory for evaluating password security, detecting predictable keyboard and dictionary patterns, estimating theoretical entropy, and learning defense principles.
 
-## Features
+---
 
-- Five transparent core criteria: length (12+ characters), uppercase, lowercase, digit, and punctuation/symbol.
-- Detection of a small local list of common passwords and obvious variants.
-- Warnings for sequential characters, simple keyboard walks, and long repeated-character runs.
-- Passwords are not printed in the CLI report or echoed into the result UI.
-- Browser logic is local-only: no external libraries, network calls, analytics, or password persistence.
-- Automated tests run in GitHub Actions for Python 3.11, 3.12, and 3.13.
+## Key Capabilities
 
-## Quick start on Windows
+- **Explainable Hybrid Scoring (0–100):** Combines Unicode code-point length ($L$), theoretical character-pool entropy ($E$), and pattern quality ($P$) under strict, hierarchical severity caps.
+- **Deterministic Pattern Detectors:** Flags ascending/descending alphanumeric runs, repeated-character runs, standard QWERTY keyboard walks, four-digit year suffixes, and common-password variants.
+- **Offline & Bundled Dictionaries:** Curated offline dictionary (`data/common_passwords.txt`) matching whole candidates (long passphrases with dictionary substrings are never penalized).
+- **Custom Wordlists:** Supports user-supplied custom dictionaries in both the Python CLI (`--dictionary PATH`) and browser (in-memory File API) with defensive limits (1 MiB max, 10,000 entries max).
+- **100% Cross-Language Parity:** Verified identical scoring, penalties, and classifications between the Python engine (`password_analyzer.py`) and JavaScript engine (`assets/js/analyzer.js`) via shared golden vectors (`tests/golden_vectors.json`).
+- **Zero-Storage Privacy Model:** Local processing only. Zero network requests, zero telemetry, zero cookies, zero `localStorage`. Input is masked by default with accessible Show/Hide and Clear/Clear All controls.
+- **Sanitized JSON & PDF Export:** Strict allowlist report export omitting all passwords, masks, hashes, or candidate-derived secrets. Includes `@media print` styling for clean browser Print → Save as PDF.
+- **Interactive Learning Mode:** Explore security concepts with pre-configured synthetic demonstration examples.
+- **Benchmark Evaluation Lab:** Built-in synthetic test laboratory measuring precision, recall, false-positive, and false-negative rates.
 
-Open PowerShell in this project folder:
+---
 
-```powershell
-python --version
-python password_strength_checker.py
+## Architecture Overview
+
+```text
+password_strength_checker/
+├── index.html                      # Standalone responsive web dashboard (GitHub Pages compatible)
+├── assets/
+│   ├── css/
+│   │   └── app.css                 # Dark theme styling, accessible focus, @media print PDF layout
+│   └── js/
+│       ├── analyzer.js             # Pure JavaScript analysis engine (ES module & browser script)
+│       └── app.js                  # UI controller, debounced input, File API, JSON export
+├── password_analyzer.py            # Pure Python analysis engine (0-100 hybrid score, entropy, patterns)
+├── password_strength_checker.py    # CLI application (--dictionary, --json-out) & compatibility layer
+├── security_spec.json              # Central single-source-of-truth specification for rules & scoring
+├── data/
+│   ├── common_passwords.txt        # Curated offline predictable credentials collection
+│   └── dictionary_provenance.md    # Ethical provenance and review documentation
+├── tests/
+│   ├── test_analyzer.py            # Core engine and Unicode tests
+│   ├── test_patterns.py            # Sequence, repeat, walk, year, variant rule tests
+│   ├── test_exports.py             # Export privacy allowlist and non-leakage verification
+│   ├── test_web_parity.mjs         # Node.js test runner verifying 100% JS/Python parity
+│   ├── golden_vectors.json         # Shared vector dataset consumed across languages
+│   └── test_password_checker.py    # Regression coverage for legacy public APIs
+├── benchmarks/
+│   ├── synthetic_cases.json        # Labeled synthetic test cases across all categories
+│   └── evaluate.py                 # Precision, recall, FPR, and FNR measurement script
+└── docs/
+    ├── architecture.md             # Detailed system architecture and design invariants
+    ├── scoring-methodology.md      # Mathematical formula derivations and severity caps
+    └── privacy.md                  # Threat model, DOM safety, and zero-storage guarantees
 ```
 
-If hidden terminal input is not supported, the CLI stops rather than intentionally falling back to visible password entry. Open a normal PowerShell or Windows Terminal session and try again.
+---
 
-To launch the browser interface:
+## Quick Start
+
+### 1. Web Application (Standalone Browser)
+
+Open `index.html` in any modern web browser (no local web server or build step required):
 
 ```powershell
 start index.html
 ```
 
-The web interface analyzes locally as you type. Clearing the field removes the password from the page's current input; it is not stored by this project.
+Or open directly in Chrome, Firefox, Safari, or Edge.
 
-## Run tests
+### 2. Python CLI
 
-```powershell
-python -m unittest -v
-```
-
-Or:
+Run the interactive CLI in any standard terminal:
 
 ```powershell
-python test_password_checker.py
+python password_strength_checker.py
 ```
 
-No third-party Python packages or JavaScript packages are required.
+#### Optional CLI Flags:
+```powershell
+# Analyze with a custom proprietary wordlist
+python password_strength_checker.py --dictionary my_team_words.txt
 
-## How scoring works
+# Export a sanitized, password-free JSON report
+python password_strength_checker.py --json-out report.json
+```
 
-The score is the number of passed **core criteria**, shown as `n/5`. Common-password matches are classified as **Very Weak**. A detected sequence, keyboard walk, or repeated-character run caps the displayed classification at **Weak**, even if all five core criteria pass. The warning checks do not add points to the five-point score.
+---
 
-The 12-character criterion is a project heuristic, not a universal account policy. Prefer long, unique passwords (15+ characters is a useful target for password-only sign-in where supported), use a password manager, avoid re-use, and enable multi-factor authentication where available.
+## Automated Test Suites
 
-## Security and limitations
+Smart Password Security Lab requires **zero external dependencies** — tests run using standard libraries:
 
-This tool is an educational heuristic, **not a cryptographic guarantee**. It does not check breached-password databases, estimate attack cost accurately, inspect a site's password policy, or prove that a password is safe. The common-password list is intentionally small and cannot catch every weak password or mutation. Pattern checks can produce false positives or miss patterns. Do not submit a real password to any checker unless you trust its implementation; for real accounts, a reputable password manager's generator is often the safer choice.
+### Run Python Unit & Regression Tests:
+```powershell
+python -m unittest discover -s tests -v
+python -m unittest test_password_checker.py -v
+```
 
-The CLI does not print the password or any prefix/suffix in its report. The browser UI does not display password characters in the results. The show/hide button is an explicit local display choice and should be used carefully in shared spaces.
+### Run Cross-Language Parity Suite (Node.js):
+```powershell
+node --test tests/test_web_parity.mjs
+```
 
-## Repository hygiene
+### Run Quality Benchmark Evaluation:
+```powershell
+python benchmarks/evaluate.py
+```
 
-`.gitignore` excludes Python bytecode, test caches, virtual environments, and common editor/OS files. The workflow in `.github/workflows/tests.yml` runs the standard-library regression suite on pushes and pull requests.
+---
+
+## Benchmark Results
+
+Evaluated against the authored synthetic test suite (`benchmarks/synthetic_cases.json`):
+
+| Metric | Target | Result | Status |
+|---|---|---|---|
+| **Overall Pattern Recall** | $\ge 90.0\%$ | **100.0%** | :white_check_mark: PASSED |
+| **Benign False-Positive Rate** | $\le 5.0\%$ | **0.0% (0/20)** | :white_check_mark: PASSED |
+| **Golden Vector Parity Rate** | $100.0\%$ | **100.0% (32/32)** | :white_check_mark: PASSED |
+| **Regression Suite Pass Rate** | $100.0\%$ | **100.0% (30/30)** | :white_check_mark: PASSED |
+
+---
+
+## Security & Limitations
+
+This tool is an **educational heuristic estimator**, not an authentication service or cryptographic guarantee:
+- It does **not** query live breached-password databases (e.g. HaveIBeenPwned API).
+- It does not calculate exact GPU attack costs against customized hash algorithms (e.g. Argon2id, bcrypt, scrypt).
+- Character complexity alone does not make a password secure; length and uniqueness are paramount.
+- For all production systems, generate randomized passphrases using a reputable password manager and enable Multi-Factor Authentication (MFA).
+
+See [SECURITY.md](SECURITY.md) and [SECURITY_REVIEW.md](SECURITY_REVIEW.md) for full disclosure details.

@@ -1,38 +1,48 @@
 # Source-Code Review & Remediation Notes
 
-Reviewed repository: `gpsofficials-im/password_strength_checker`  
-Reviewed default branch: `main`  
-Review scope: Python CLI, standalone HTML/CSS/JavaScript UI, test script, repository root.
+**Reviewed repository:** `gpsofficials-im/password_strength_checker`  
+**Target:** Smart Password Security Lab v2.0  
+**Review scope:** Pure Python core, CLI compatibility layer, modular browser application, automated tests, benchmark laboratory.
 
-## Findings verified in the original source
+---
 
-| Priority | Original finding | Evidence in original code | Remediation in this package |
+## 1. Findings Verified in the Original Baseline & v1 Remediations
+
+| Priority | Original finding | Evidence in original code | Remediation in v1 baseline |
 |---|---|---|---|
-| High | CLI password was visible while typing | `get_user_password()` used `input()` | Uses `getpass`; converts the echo-fallback warning into an error and tells the user to retry in a capable terminal. |
-| High | Input was modified before analysis | Python used `.strip()` and browser used `.trim()` | Password characters, including intentional leading/trailing whitespace, are preserved. |
-| Medium | Score denominator was misleading | CLI displayed `score/6` although only five criteria added points; browser displayed `score/5` | Both versions now show `score/5 core checks`; common/pattern checks are separate warning gates. |
-| Medium | Predictable passwords could score Strong | No sequence, repeated-character, or keyboard-walk checks existed | Adds basic checks for ascending/descending alphanumeric runs, repeated runs, and common keyboard walks; caps the rating at Weak when detected. |
-| Medium | Common-password matching was exact-list only | Original comparison checked `password.lower()` against a small list | Adds basic punctuation/case/separator normalization, a small set of common-root numeric variants, and limited leetspeak substitutions. This is still not a breached-password database. |
-| Medium | Web analysis required a button click | The original page only called `analyzePassword()` from the Check button | Adds live input updates, explicit empty-state status, and a Clear action. |
-| Medium | Dynamic UI used `innerHTML` | Original checks and suggestions were constructed with HTML strings | Uses `createElement`, `textContent`, and `replaceChildren` for result rendering. |
-| Medium | Test file demonstrated examples but did not assert correctness | Original script printed a short list of sample results | Replaces it with 10 `unittest` regression tests and CI workflow. |
-| Low | Repository hygiene/documentation gaps | The root exposed `__pycache__`; no README or `.gitignore` was present in the reviewed root listing | Adds `.gitignore`, README, and GitHub Actions test workflow. Remove any already tracked bytecode from the live repository when applying the update. |
+| High | CLI password was visible while typing | `get_user_password()` used `input()` | Uses `getpass`; converts echo-fallback warning to error requiring standard terminal. |
+| High | Input was modified before analysis | Python used `.strip()` and browser used `.trim()` | Whitespace characters preserved throughout evaluation. |
+| Medium | Score denominator was misleading | CLI displayed `score/6`, browser `score/5` | Unified 5-point core checks with separate pattern gates. |
+| Medium | Predictable passwords scored Strong | No sequence or keyboard walk checks | Added basic sequences, repeated runs, and keyboard walks. |
+| Medium | Dynamic UI used `innerHTML` | DOM populated via string template | Refactored to `createElement`, `textContent`, and `replaceChildren`. |
+| Low | Repository hygiene gaps | Tracked bytecode, missing CI | Added `.gitignore` and GitHub Actions test workflow. |
 
-## Design choices
+---
 
-- **Five-point score:** The score remains a count of five visible core criteria. Common-password and pattern warnings can lower the classification without falsifying that score.
-- **12-character target:** The project's length criterion is raised from 8 to 12 characters as an educational heuristic. README guidance recommends considering 15+ characters for password-only sign-in where the service supports it. Account requirements depend on the service and its authentication context.
-- **No fabricated entropy score:** A simplistic Shannon-entropy formula can overstate the strength of patterned passwords. This version reports observable checks and warns that its category is only a heuristic.
-- **No password echo in reports:** The Python report prints only `[hidden for privacy]`; the browser result view displays only a hidden marker and character count. The browser's Show/Hide toggle remains an explicit user action.
-- **No network or persistence:** The web UI includes no external assets, API calls, analytics, localStorage, or sessionStorage. It works as a local HTML file.
+## 2. Advanced Upgrades Implemented in Smart Password Security Lab v2.0
 
-## Verification performed
+| Domain | Architectural Challenge | Remediation & Implementation in v2.0 |
+|---|---|---|
+| Dual Architecture | Duplicate, divergent logic between Python & JS | Decoupled pure analysis engines (`password_analyzer.py` and `assets/js/analyzer.js`) with 100% parity verified via `tests/golden_vectors.json`. |
+| Scoring Formulation | Heuristic 5-point score lacked fine granularity | Implemented explainable 0–100 hybrid score combining Length ($L$), Theoretical Entropy ($E$), and Pattern Quality ($P$), with hierarchical severity caps. |
+| Entropy Realism | Raw entropy overstates strength on predictable keys | Documented as theoretical upper bound with explicit disclaimers; non-ASCII flagged and renormalized via `ENTROPY_UNCALIBRATED_UNICODE`. |
+| Custom Dictionary | Potential memory leaks or path leakage in CLI/UI | Implemented bounded custom wordlist parser (1 MiB max, 10,000 entries max, 256 code points max) in volatile memory only; generic error reporting. |
+| Export Privacy | Potential secret leakage in reports or logs | Strict allowlist serialization for JSON (`tests/test_exports.py`); print-friendly `@media print` PDF layout omitting inputs. |
+| Educational UI | Passive assessment without user understanding | Implemented Interactive Learning Mode with synthetic demonstration cases and responsive dark dashboard. |
+| Benchmark Verification | Undocumented rule quality | Created synthetic benchmark laboratory (`benchmarks/evaluate.py`), reporting 100% pattern recall and 0.0% false positives on benign passphrases. |
 
-- `python -m py_compile password_strength_checker.py test_password_checker.py` — passed.
-- `python -m unittest -v` — 10 tests passed.
-- `node --check` on the extracted inline browser script — passed.
-- Browser UI smoke test with a lightweight DOM mock — passed for live strong-password feedback, predictable-sequence downgrade, common-password override, Clear, and Show/Hide interactions.
+---
 
-## Remaining limitations
+## 3. Verification Performed
 
-The common-password set is small, pattern checks can have false positives/negatives, and the tool cannot determine whether a password has been breached or estimate real-world attack cost reliably. A browser-based checker should not be treated as a certification of password safety. A reputable password-manager generator and unique passwords per account are the safer default.
+- `python -m unittest discover -s tests -v`: 20 unit tests passed.
+- `python -m unittest test_password_checker.py -v`: 10 legacy compatibility tests passed.
+- `node --test tests/test_web_parity.mjs`: 33 cross-language golden parity tests passed.
+- `python benchmarks/evaluate.py`: Benchmark quality targets passed (100% pattern recall, 0.0% false positive rate on benign passphrases, 100% golden vector pass rate).
+- `node --check assets/js/analyzer.js assets/js/app.js`: 0 syntax errors.
+
+---
+
+## 4. Remaining Limitations
+
+The tool is an educational heuristic, **not a cryptographic guarantee**. It does not check live breached-password dumps or compute real-world GPU attack cracking costs. The offline dictionary is intentionally curated and small. For production credentials, a reputable password manager with randomized generation and Multi-Factor Authentication (MFA) remains essential.

@@ -17,3 +17,7 @@ env/
 .DS_Store
 Thumbs.db
 .refact/
+
+# Temporary test outputs
+report*.json
+*.pdf
