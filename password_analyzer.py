@@ -295,6 +295,11 @@ def calculate_entropy(password: str) -> dict[str, Any]:
     }
 
 
+def round_half_up(val: float) -> int:
+    """Deterministic rounding matching IEEE 754 / JavaScript Math.round."""
+    return math.floor(val + 0.5)
+
+
 def analyze_password(
     password: str,
     custom_dict: frozenset[str] | None = None,
@@ -418,10 +423,10 @@ def analyze_password(
         base_score = 0
     elif entropy_info["status"] == "CALCULATED" and entropy_info["normalized_score"] is not None:
         e_score = entropy_info["normalized_score"]
-        base_score = round(0.55 * length_component + 0.15 * e_score + 0.30 * pattern_component)
+        base_score = round_half_up(0.55 * length_component + 0.15 * e_score + 0.30 * pattern_component)
     else:
         # Non-ASCII or uncalibrated entropy: renormalize length (0.55) + pattern (0.30) / 0.85
-        base_score = round((0.55 * length_component + 0.30 * pattern_component) / 0.85)
+        base_score = round_half_up((0.55 * length_component + 0.30 * pattern_component) / 0.85)
 
     base_score = max(0, min(100, base_score))
 

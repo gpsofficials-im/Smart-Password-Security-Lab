@@ -1,0 +1,993 @@
+[
+  {
+    "id": "empty",
+    "description": "Empty input",
+    "password": "",
+    "custom_dict": [],
+    "expected": {
+      "score": 0,
+      "classification": "Very Weak",
+      "length_code_points": 0,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": false,
+        "has_uppercase": false,
+        "has_digits": false,
+        "has_symbols": false
+      },
+      "rule_ids": [],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_DIVERSIFY_CASING",
+        "REC_INCLUDE_DIGITS",
+        "REC_INCLUDE_SYMBOLS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "spaces_only_12",
+    "description": "Twelve whitespace characters",
+    "password": "            ",
+    "custom_dict": [],
+    "expected": {
+      "score": 57,
+      "classification": "Moderate",
+      "length_code_points": 12,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": false,
+        "has_uppercase": false,
+        "has_digits": false,
+        "has_symbols": false
+      },
+      "rule_ids": [
+        "PATTERN_REPEATED_RUN"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_PREDICTABLE_PATTERN"
+      ],
+      "recommendation_ids": [
+        "REC_CONSIDER_15_PLUS",
+        "REC_REMOVE_REPEATS",
+        "REC_DIVERSIFY_CASING",
+        "REC_INCLUDE_DIGITS",
+        "REC_INCLUDE_SYMBOLS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "leading_trailing_space",
+    "description": "Leading and trailing spaces",
+    "password": "  Secret2026!  ",
+    "custom_dict": [],
+    "expected": {
+      "score": 29,
+      "classification": "Weak",
+      "length_code_points": 15,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [
+        "PATTERN_COMMON_VARIANT"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_COMMON_VARIANT"
+      ],
+      "recommendation_ids": [
+        "REC_CHOOSE_UNRELATED_PHRASE",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "short_crit_3",
+    "description": "Critically short 3 chars",
+    "password": "a1!",
+    "custom_dict": [],
+    "expected": {
+      "score": 19,
+      "classification": "Very Weak",
+      "length_code_points": 3,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": true,
+        "has_uppercase": false,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_CRITICALLY_SHORT"
+      ],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_DIVERSIFY_CASING",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "short_crit_7",
+    "description": "Critically short 7 chars",
+    "password": "A1!b2@c",
+    "custom_dict": [],
+    "expected": {
+      "score": 19,
+      "classification": "Very Weak",
+      "length_code_points": 7,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_CRITICALLY_SHORT"
+      ],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "band_8_to_11",
+    "description": "8 to 11 chars range",
+    "password": "PineApple8!",
+    "custom_dict": [],
+    "expected": {
+      "score": 49,
+      "classification": "Moderate",
+      "length_code_points": 11,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_SUB_RECOMMENDED_LENGTH"
+      ],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "band_12_to_14",
+    "description": "12 to 14 chars range",
+    "password": "PineApple8!Oak",
+    "custom_dict": [],
+    "expected": {
+      "score": 69,
+      "classification": "Strong",
+      "length_code_points": 14,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [],
+      "recommendation_ids": [
+        "REC_CONSIDER_15_PLUS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "long_robust_15",
+    "description": "15+ robust passphrase",
+    "password": "PineApple8!OakTree7$",
+    "custom_dict": [],
+    "expected": {
+      "score": 100,
+      "classification": "Very Strong",
+      "length_code_points": 20,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [],
+      "recommendation_ids": [
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "bundled_exact_password",
+    "description": "Exact bundled password",
+    "password": "password",
+    "custom_dict": [],
+    "expected": {
+      "score": 9,
+      "classification": "Very Weak",
+      "length_code_points": 8,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": true,
+        "has_uppercase": false,
+        "has_digits": false,
+        "has_symbols": false
+      },
+      "rule_ids": [
+        "DICT_BUNDLED_EXACT"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_COMMON_PASSWORD",
+        "WARN_SUB_RECOMMENDED_LENGTH"
+      ],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_CHOOSE_UNRELATED_PHRASE",
+        "REC_DIVERSIFY_CASING",
+        "REC_INCLUDE_DIGITS",
+        "REC_INCLUDE_SYMBOLS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "bundled_exact_123456",
+    "description": "Exact bundled digits",
+    "password": "123456",
+    "custom_dict": [],
+    "expected": {
+      "score": 9,
+      "classification": "Very Weak",
+      "length_code_points": 6,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": false,
+        "has_uppercase": false,
+        "has_digits": true,
+        "has_symbols": false
+      },
+      "rule_ids": [
+        "PATTERN_ASCENDING_SEQUENCE",
+        "PATTERN_KEYBOARD_WALK",
+        "DICT_BUNDLED_EXACT"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_COMMON_PASSWORD",
+        "WARN_CRITICALLY_SHORT",
+        "WARN_PREDICTABLE_PATTERN"
+      ],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_CHOOSE_UNRELATED_PHRASE",
+        "REC_REMOVE_SEQUENCES",
+        "REC_REMOVE_KEYBOARD_WALK",
+        "REC_DIVERSIFY_CASING",
+        "REC_INCLUDE_SYMBOLS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "bundled_exact_dragon",
+    "description": "Exact bundled dragon",
+    "password": "dragon",
+    "custom_dict": [],
+    "expected": {
+      "score": 9,
+      "classification": "Very Weak",
+      "length_code_points": 6,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": true,
+        "has_uppercase": false,
+        "has_digits": false,
+        "has_symbols": false
+      },
+      "rule_ids": [
+        "DICT_BUNDLED_EXACT"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_COMMON_PASSWORD",
+        "WARN_CRITICALLY_SHORT"
+      ],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_CHOOSE_UNRELATED_PHRASE",
+        "REC_DIVERSIFY_CASING",
+        "REC_INCLUDE_DIGITS",
+        "REC_INCLUDE_SYMBOLS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "bundled_exact_cased",
+    "description": "Exact bundled with uppercase",
+    "password": "PASSWORD",
+    "custom_dict": [],
+    "expected": {
+      "score": 9,
+      "classification": "Very Weak",
+      "length_code_points": 8,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": false,
+        "has_uppercase": true,
+        "has_digits": false,
+        "has_symbols": false
+      },
+      "rule_ids": [
+        "DICT_BUNDLED_EXACT"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_COMMON_PASSWORD",
+        "WARN_SUB_RECOMMENDED_LENGTH"
+      ],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_CHOOSE_UNRELATED_PHRASE",
+        "REC_DIVERSIFY_CASING",
+        "REC_INCLUDE_DIGITS",
+        "REC_INCLUDE_SYMBOLS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "custom_exact",
+    "description": "Exact custom dictionary match",
+    "password": "MyCompanySecret",
+    "custom_dict": [
+      "mycompanysecret"
+    ],
+    "expected": {
+      "score": 9,
+      "classification": "Very Weak",
+      "length_code_points": 15,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": false,
+        "has_symbols": false
+      },
+      "rule_ids": [
+        "DICT_CUSTOM_EXACT"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_CUSTOM_DICTIONARY_MATCH"
+      ],
+      "recommendation_ids": [
+        "REC_CHOOSE_UNRELATED_PHRASE",
+        "REC_INCLUDE_DIGITS",
+        "REC_INCLUDE_SYMBOLS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "seq_ascending_letters",
+    "description": "Ascending sequence abcd",
+    "password": "Tiger-abcd-2026!",
+    "custom_dict": [],
+    "expected": {
+      "score": 82,
+      "classification": "Very Strong",
+      "length_code_points": 16,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [
+        "PATTERN_ASCENDING_SEQUENCE"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_PREDICTABLE_PATTERN"
+      ],
+      "recommendation_ids": [
+        "REC_REMOVE_SEQUENCES",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "seq_ascending_digits",
+    "description": "Ascending digits 1234",
+    "password": "Tiger-1234-Orbit!",
+    "custom_dict": [],
+    "expected": {
+      "score": 77,
+      "classification": "Strong",
+      "length_code_points": 17,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [
+        "PATTERN_ASCENDING_SEQUENCE",
+        "PATTERN_KEYBOARD_WALK"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_PREDICTABLE_PATTERN"
+      ],
+      "recommendation_ids": [
+        "REC_REMOVE_SEQUENCES",
+        "REC_REMOVE_KEYBOARD_WALK",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "seq_descending_letters",
+    "description": "Descending sequence dcba",
+    "password": "Tiger-dcba-2026!",
+    "custom_dict": [],
+    "expected": {
+      "score": 82,
+      "classification": "Very Strong",
+      "length_code_points": 16,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [
+        "PATTERN_ASCENDING_SEQUENCE"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_PREDICTABLE_PATTERN"
+      ],
+      "recommendation_ids": [
+        "REC_REMOVE_SEQUENCES",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "seq_descending_digits",
+    "description": "Descending digits 9876",
+    "password": "Tiger-9876-Orbit!",
+    "custom_dict": [],
+    "expected": {
+      "score": 77,
+      "classification": "Strong",
+      "length_code_points": 17,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [
+        "PATTERN_ASCENDING_SEQUENCE",
+        "PATTERN_KEYBOARD_WALK"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_PREDICTABLE_PATTERN"
+      ],
+      "recommendation_ids": [
+        "REC_REMOVE_SEQUENCES",
+        "REC_REMOVE_KEYBOARD_WALK",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "repeated_chars_run",
+    "description": "Repeated character run ZZZZ",
+    "password": "Tiger-ZZZZ-Orbit7!",
+    "custom_dict": [],
+    "expected": {
+      "score": 89,
+      "classification": "Very Strong",
+      "length_code_points": 18,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [
+        "PATTERN_REPEATED_RUN"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_PREDICTABLE_PATTERN"
+      ],
+      "recommendation_ids": [
+        "REC_REMOVE_REPEATS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "keyboard_walk_qwerty",
+    "description": "Keyboard walk qwerty",
+    "password": "Tiger-qwerty-2026!",
+    "custom_dict": [],
+    "expected": {
+      "score": 87,
+      "classification": "Very Strong",
+      "length_code_points": 18,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [
+        "PATTERN_KEYBOARD_WALK"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_PREDICTABLE_PATTERN"
+      ],
+      "recommendation_ids": [
+        "REC_REMOVE_KEYBOARD_WALK",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "keyboard_walk_asdf",
+    "description": "Keyboard walk asdf",
+    "password": "Tiger-asdf-2026!",
+    "custom_dict": [],
+    "expected": {
+      "score": 82,
+      "classification": "Very Strong",
+      "length_code_points": 16,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [
+        "PATTERN_KEYBOARD_WALK"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_PREDICTABLE_PATTERN"
+      ],
+      "recommendation_ids": [
+        "REC_REMOVE_KEYBOARD_WALK",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "keyboard_walk_1qaz",
+    "description": "Diagonal walk 1qaz",
+    "password": "Tiger-1qaz-2026!",
+    "custom_dict": [],
+    "expected": {
+      "score": 82,
+      "classification": "Very Strong",
+      "length_code_points": 16,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [
+        "PATTERN_KEYBOARD_WALK"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_PREDICTABLE_PATTERN"
+      ],
+      "recommendation_ids": [
+        "REC_REMOVE_KEYBOARD_WALK",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "year_suffix_common",
+    "description": "Year suffix on common base",
+    "password": "password2024",
+    "custom_dict": [],
+    "expected": {
+      "score": 29,
+      "classification": "Weak",
+      "length_code_points": 12,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": false,
+        "has_digits": true,
+        "has_symbols": false
+      },
+      "rule_ids": [
+        "PATTERN_YEAR_SUFFIX",
+        "PATTERN_COMMON_VARIANT"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_COMMON_VARIANT",
+        "WARN_YEAR_SUFFIX"
+      ],
+      "recommendation_ids": [
+        "REC_CONSIDER_15_PLUS",
+        "REC_CHOOSE_UNRELATED_PHRASE",
+        "REC_REMOVE_YEAR",
+        "REC_DIVERSIFY_CASING",
+        "REC_INCLUDE_SYMBOLS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "year_suffix_admin",
+    "description": "Year suffix admin1999",
+    "password": "admin1999",
+    "custom_dict": [],
+    "expected": {
+      "score": 29,
+      "classification": "Weak",
+      "length_code_points": 9,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": true,
+        "has_uppercase": false,
+        "has_digits": true,
+        "has_symbols": false
+      },
+      "rule_ids": [
+        "PATTERN_YEAR_SUFFIX",
+        "PATTERN_COMMON_VARIANT"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_COMMON_VARIANT",
+        "WARN_SUB_RECOMMENDED_LENGTH",
+        "WARN_YEAR_SUFFIX"
+      ],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_CHOOSE_UNRELATED_PHRASE",
+        "REC_REMOVE_YEAR",
+        "REC_DIVERSIFY_CASING",
+        "REC_INCLUDE_SYMBOLS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "variant_leetspeak",
+    "description": "Common variant leetspeak P@ssw0rd",
+    "password": "P@ssw0rd!",
+    "custom_dict": [],
+    "expected": {
+      "score": 29,
+      "classification": "Weak",
+      "length_code_points": 9,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [
+        "PATTERN_COMMON_VARIANT"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_COMMON_VARIANT",
+        "WARN_SUB_RECOMMENDED_LENGTH"
+      ],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_CHOOSE_UNRELATED_PHRASE",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "variant_numeric_suffix",
+    "description": "Common variant trailing digits",
+    "password": "password99",
+    "custom_dict": [],
+    "expected": {
+      "score": 29,
+      "classification": "Weak",
+      "length_code_points": 10,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": true,
+        "has_uppercase": false,
+        "has_digits": true,
+        "has_symbols": false
+      },
+      "rule_ids": [
+        "PATTERN_COMMON_VARIANT"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_COMMON_VARIANT",
+        "WARN_SUB_RECOMMENDED_LENGTH"
+      ],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_CHOOSE_UNRELATED_PHRASE",
+        "REC_DIVERSIFY_CASING",
+        "REC_INCLUDE_SYMBOLS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "variant_compact_symbols",
+    "description": "Common variant with symbols",
+    "password": "pass-word",
+    "custom_dict": [],
+    "expected": {
+      "score": 29,
+      "classification": "Weak",
+      "length_code_points": 9,
+      "criteria": {
+        "length_target_met": false,
+        "has_lowercase": true,
+        "has_uppercase": false,
+        "has_digits": false,
+        "has_symbols": true
+      },
+      "rule_ids": [
+        "PATTERN_COMMON_VARIANT"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_COMMON_VARIANT",
+        "WARN_SUB_RECOMMENDED_LENGTH"
+      ],
+      "recommendation_ids": [
+        "REC_INCREASE_LENGTH",
+        "REC_CHOOSE_UNRELATED_PHRASE",
+        "REC_DIVERSIFY_CASING",
+        "REC_INCLUDE_DIGITS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "high_entropy_passphrase",
+    "description": "Correct Horse Battery Staple style",
+    "password": "Correct-Horse-Battery-Staple-2026!",
+    "custom_dict": [],
+    "expected": {
+      "score": 100,
+      "classification": "Very Strong",
+      "length_code_points": 34,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [],
+      "recommendation_ids": [
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "unicode_spanish",
+    "description": "Spanish accented characters",
+    "password": "ContraseñaSegura2026!",
+    "custom_dict": [],
+    "expected": {
+      "score": 100,
+      "classification": "Very Strong",
+      "length_code_points": 21,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [],
+      "entropy_status": "UNAVAILABLE_NON_ASCII",
+      "entropy_warning": "ENTROPY_UNCALIBRATED_UNICODE",
+      "warning_ids": [
+        "WARN_ENTROPY_UNCALIBRATED_UNICODE"
+      ],
+      "recommendation_ids": [
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "unicode_emoji",
+    "description": "Password with Emoji",
+    "password": "Secure🔒Key🔑Vault2026!",
+    "custom_dict": [],
+    "expected": {
+      "score": 100,
+      "classification": "Very Strong",
+      "length_code_points": 21,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [],
+      "entropy_status": "UNAVAILABLE_NON_ASCII",
+      "entropy_warning": "ENTROPY_UNCALIBRATED_UNICODE",
+      "warning_ids": [
+        "WARN_ENTROPY_UNCALIBRATED_UNICODE"
+      ],
+      "recommendation_ids": [
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "unicode_tamil",
+    "description": "Tamil script characters",
+    "password": "வணக்கம்2026!கடவுச்சொல்",
+    "custom_dict": [],
+    "expected": {
+      "score": 100,
+      "classification": "Very Strong",
+      "length_code_points": 22,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": false,
+        "has_uppercase": false,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [],
+      "entropy_status": "UNAVAILABLE_NON_ASCII",
+      "entropy_warning": "ENTROPY_UNCALIBRATED_UNICODE",
+      "warning_ids": [
+        "WARN_ENTROPY_UNCALIBRATED_UNICODE"
+      ],
+      "recommendation_ids": [
+        "REC_DIVERSIFY_CASING",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "overlapping_patterns",
+    "description": "Multiple overlapping patterns",
+    "password": "abcd1234qwertyAAAA2024",
+    "custom_dict": [],
+    "expected": {
+      "score": 76,
+      "classification": "Strong",
+      "length_code_points": 22,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": false
+      },
+      "rule_ids": [
+        "PATTERN_ASCENDING_SEQUENCE",
+        "PATTERN_REPEATED_RUN",
+        "PATTERN_KEYBOARD_WALK"
+      ],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [
+        "WARN_PREDICTABLE_PATTERN"
+      ],
+      "recommendation_ids": [
+        "REC_REMOVE_SEQUENCES",
+        "REC_REMOVE_REPEATS",
+        "REC_REMOVE_KEYBOARD_WALK",
+        "REC_INCLUDE_SYMBOLS",
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  },
+  {
+    "id": "max_supported_length",
+    "description": "Long valid passphrase 70 chars",
+    "password": "Ultra-Long-Multi-Token-Passphrase-Containing-Multiple-Unrelated-Words-2026!",
+    "custom_dict": [],
+    "expected": {
+      "score": 100,
+      "classification": "Very Strong",
+      "length_code_points": 75,
+      "criteria": {
+        "length_target_met": true,
+        "has_lowercase": true,
+        "has_uppercase": true,
+        "has_digits": true,
+        "has_symbols": true
+      },
+      "rule_ids": [],
+      "entropy_status": "CALCULATED",
+      "entropy_warning": null,
+      "warning_ids": [],
+      "recommendation_ids": [
+        "REC_USE_PASSWORD_MANAGER"
+      ]
+    }
+  }
+]
