@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2.0.0",
+  "title": "Smart Password Security Lab Specification",
+  "scoring": {
+    "weights": {
+      "length_weight": 0.55,
+      "entropy_weight": 0.15,
+      "pattern_weight": 0.30
+    },
+    "renormalized_weights_no_entropy": {
+      "length_weight_renormalized": 0.6470588235294118,
+      "pattern_weight_renormalized": 0.35294117647058826,
+      "denominator": 0.85
+    },
+    "length_multiplier": 5,
+    "max_length_score": 100,
+    "max_entropy_bits_reference": 80,
+    "max_entropy_score": 100,
+    "max_pattern_score": 100,
+    "classification_bands": [
+      { "min": 0, "max": 19, "name": "Very Weak" },
+      { "min": 20, "max": 39, "name": "Weak" },
+      { "min": 40, "max": 59, "name": "Moderate" },
+      { "min": 60, "max": 79, "name": "Strong" },
+      { "min": 80, "max": 100, "name": "Very Strong" }
+    ],
+    "length_guidance_thresholds": {
+      "recommended": 15,
+      "minimum": 12,
+      "short": 8
+    },
+    "severity_caps": {
+      "exact_bundled_dictionary_max": 9,
+      "exact_custom_dictionary_max": 9,
+      "common_variant_max": 29,
+      "length_under_8_max": 19,
+      "length_8_to_11_max": 49,
+      "length_12_to_14_max": 69
+    }
+  },
+  "rules": {
+    "PATTERN_ASCENDING_SEQUENCE": {
+      "id": "PATTERN_ASCENDING_SEQUENCE",
+      "name": "Sequential Character Run",
+      "description": "Ascending or descending alphanumeric run of at least four characters.",
+      "penalty_per_run": 25,
+      "max_penalty": 35,
+      "min_run_length": 4
+    },
+    "PATTERN_REPEATED_RUN": {
+      "id": "PATTERN_REPEATED_RUN",
+      "name": "Repeated Character Run",
+      "description": "Same character repeated at least four consecutive times.",
+      "penalty": 20,
+      "min_run_length": 4
+    },
+    "PATTERN_KEYBOARD_WALK": {
+      "id": "PATTERN_KEYBOARD_WALK",
+      "name": "Keyboard Walk Pattern",
+      "description": "Recognized four-or-more-key walk in a standard QWERTY keyboard layout.",
+      "penalty": 25,
+      "min_run_length": 4
+    },
+    "PATTERN_YEAR_SUFFIX": {
+      "id": "PATTERN_YEAR_SUFFIX",
+      "name": "Word Followed by Year Suffix",
+      "description": "Four-digit year-like suffix (1900-2099) following a common base word.",
+      "penalty": 10
+    },
+    "PATTERN_COMMON_VARIANT": {
+      "id": "PATTERN_COMMON_VARIANT",
+      "name": "Predictable Common Password Variant",
+      "description": "Predictable modification (leetspeak, casing, or short trailing digits) of a common password.",
+      "penalty": 25,
+      "cap": 29,
+      "max_classification": "Weak"
+    },
+    "DICT_BUNDLED_EXACT": {
+      "id": "DICT_BUNDLED_EXACT",
+      "name": "Bundled Dictionary Match",
+      "description": "Exact match against offline bundled dictionary.",
+      "penalty": 90,
+      "cap": 9,
+      "classification": "Very Weak"
+    },
+    "DICT_CUSTOM_EXACT": {
+      "id": "DICT_CUSTOM_EXACT",
+      "name": "Custom Dictionary Match",
+      "description": "Exact match against user-supplied custom dictionary.",
+      "penalty": 90,
+      "cap": 9,
+      "classification": "Very Weak"
+    }
+  },
+  "dictionary_limits": {
+    "max_file_size_bytes": 1048576,
+    "max_entries": 10000,
+    "max_entry_length_code_points": 256
+  },
+  "report_schema_version": "2.0.0",
+  "allowed_export_fields": [
+    "report_schema_version",
+    "analysis_version",
+    "generated_at",
+    "score",
+    "classification",
+    "length_code_points",
+    "criteria",
+    "warnings",
+    "recommendation_ids",
+    "entropy_estimate"
+  ]
+}

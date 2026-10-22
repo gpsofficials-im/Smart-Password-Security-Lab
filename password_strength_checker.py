@@ -1,46 +1,36 @@
-"""Password Strength Checker - secure, dependency-free CLI implementation.
+"""Smart Password Security Lab - CLI Application & Compatibility Layer.
 
-This educational checker evaluates basic password characteristics and flags
-several predictable patterns. It does not contact a server, save passwords,
-or replace breached-password screening or a dedicated password-strength meter.
+This module provides the command-line interface for Smart Password Security Lab,
+supporting optional custom dictionary loading (--dictionary PATH) and
+allowlisted JSON report export (--json-out PATH).
+It also maintains full backward compatibility for legacy public check functions.
 """
 
 from __future__ import annotations
 
+import argparse
 import getpass
+import json
+import os
 import re
+import sys
 import warnings
 from typing import Any
+
+import password_analyzer as core
 
 MIN_PASSWORD_LENGTH = 12
 RECOMMENDED_PASSWORD_LENGTH = 15
 
-COMMON_PASSWORDS = frozenset(
-    {
-        "123456", "password", "12345678", "qwerty", "123456789",
-        "12345", "1234", "111111", "1234567", "dragon",
-        "123123", "baseball", "iloveyou", "trustno1", "sunshine",
-        "master", "welcome", "shadow", "ashley", "football",
-        "jesus", "michael", "ninja", "mustang", "password1",
-        "password123", "admin", "letmein", "monkey", "access",
-        "hello", "charlie", "donald", "princess", "qwerty123",
-        "admin123", "root", "toor", "pass", "test", "guest",
-        "master123", "changeme", "orange", "secret", "123qwe",
-        "zxcvbn", "1234567890", "password12", "login",
-    }
-)
-
-# Common roots plus short numeric suffixes are frequent, predictable variants.
-_COMMON_BASES = (
-    "password", "admin", "qwerty", "welcome", "letmein", "iloveyou",
-    "monkey", "dragon", "login", "changeme", "master", "guest",
-)
-_KEYBOARD_PATTERNS = ("qwerty", "asdf", "zxcv", "qwer", "wasd", "1qaz", "zaq1")
+# Exported for backward compatibility
+COMMON_PASSWORDS = core.DEFAULT_BUNDLED_PASSWORDS
+_COMMON_BASES = core.COMMON_BASES
+_KEYBOARD_PATTERNS = core.KEYBOARD_WALK_PATTERNS
 
 
 def check_length(password: str) -> bool:
-    """Return whether the password reaches the project's 12-character target."""
-    return len(password) >= MIN_PASSWORD_LENGTH
+    """Return whether the password reaches the 12-character target."""
+    return core.count_code_points(password) >= MIN_PASSWORD_LENGTH
 
 
 def check_uppercase(password: str) -> bool:
@@ -64,117 +54,106 @@ def check_special_characters(password: str) -> bool:
 
 
 def check_common_passwords(password: str) -> bool:
-    """Flag common passwords and obvious punctuation/case/numeric variants."""
+    """Flag common passwords and predictable transformations."""
     lowered = password.casefold()
-    if lowered in COMMON_PASSWORDS:
+    if lowered in core._BUNDLED_PASSWORDS:
         return True
-
-    # Removing separators catches forms such as "Password!" and "pass-word".
-    compact = re.sub(r"[^a-z0-9]", "", lowered)
-    if compact in COMMON_PASSWORDS:
-        return True
-
-    # Also catch a small, common set of leetspeak substitutions (e.g. P@ssw0rd).
-    leet_text = lowered.translate(str.maketrans({"@": "a", "$": "s", "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t"}))
-    leet_compact = re.sub(r"[^a-z0-9]", "", leet_text)
-    if leet_compact in COMMON_PASSWORDS:
-        return True
-
-    candidates = (compact, leet_compact)
-    return any(
-        re.fullmatch(re.escape(root) + r"[0-9]{0,4}", candidate)
-        for candidate in candidates
-        for root in _COMMON_BASES
-    )
+    return core.detect_common_variant(password, core._BUNDLED_PASSWORDS)
 
 
 def check_sequential_patterns(password: str, minimum_run: int = 4) -> bool:
-    """Detect ascending/descending runs such as abcd, 1234, or 9876."""
-    compact = re.sub(r"[^a-z0-9]", "", password.casefold())
-    if len(compact) < minimum_run:
-        return False
-
-    run_length = 1
-    previous_delta = 0
-    for index in range(1, len(compact)):
-        previous, current = compact[index - 1], compact[index]
-        same_type = (previous.isalpha() and current.isalpha()) or (previous.isdigit() and current.isdigit())
-        delta = ord(current) - ord(previous) if same_type else 0
-        if same_type and delta in (-1, 1) and (previous_delta == 0 or delta == previous_delta):
-            run_length += 1
-        else:
-            run_length = 1
-        previous_delta = delta if same_type and delta in (-1, 1) else 0
-        if run_length >= minimum_run:
-            return True
-    return False
+    """Detect ascending/descending alphanumeric runs."""
+    return core.detect_sequences(password, minimum_run=minimum_run) > 0
 
 
 def check_repeated_characters(password: str, minimum_run: int = 4) -> bool:
     """Detect a character repeated four or more times consecutively."""
-    return bool(re.search(rf"(.)\1{{{minimum_run - 1},}}", password, flags=re.DOTALL))
+    return core.detect_repeated_runs(password, minimum_run=minimum_run)
 
 
 def check_keyboard_patterns(password: str) -> bool:
-    """Detect common keyboard walks independent of letter case and separators."""
-    compact = re.sub(r"[^a-z0-9]", "", password.casefold())
-    return any(pattern in compact for pattern in _KEYBOARD_PATTERNS)
+    """Detect common keyboard walks in QWERTY layout."""
+    return core.detect_keyboard_walks(password)
 
 
-def analyze_password(password: str) -> dict[str, bool]:
-    """Return the core checks plus warnings for common and predictable patterns.
+def analyze_password(password: str, custom_dict: frozenset[str] | None = None) -> dict[str, Any]:
+    """Analyze password and return structured results with backward-compatible fields.
 
-    The password is not trimmed or otherwise changed: whitespace can be part of
-    a user's password and must not be silently removed by a checker.
+    Contains both legacy 5-point fields and v2.0 structured analysis data.
+    Never stores or prints the password.
     """
-    sequential = check_sequential_patterns(password)
-    repeated = check_repeated_characters(password)
-    keyboard = check_keyboard_patterns(password)
-    return {
-        "length": check_length(password),
-        "uppercase": check_uppercase(password),
-        "lowercase": check_lowercase(password),
-        "numbers": check_numbers(password),
-        "special": check_special_characters(password),
-        "common": check_common_passwords(password),
-        "sequence": sequential,
-        "repeated": repeated,
-        "keyboard": keyboard,
-        "predictable": sequential or repeated or keyboard,
-    }
+    v2_result = core.analyze_password(password, custom_dict=custom_dict)
+
+    length_pass = check_length(password)
+    upper_pass = check_uppercase(password)
+    lower_pass = check_lowercase(password)
+    nums_pass = check_numbers(password)
+    special_pass = check_special_characters(password)
+
+    seq_pass = check_sequential_patterns(password)
+    repeat_pass = check_repeated_characters(password)
+    keyboard_pass = check_keyboard_patterns(password)
+    common_pass = (password.casefold() in core._BUNDLED_PASSWORDS) or core.detect_common_variant(password, core._BUNDLED_PASSWORDS)
+    if custom_dict and password.casefold() in custom_dict:
+        common_pass = True
+
+    predictable = seq_pass or repeat_pass or keyboard_pass
+
+    # Merge legacy keys into result
+    v2_result["length"] = length_pass
+    v2_result["uppercase"] = upper_pass
+    v2_result["lowercase"] = lower_pass
+    v2_result["numbers"] = nums_pass
+    v2_result["special"] = special_pass
+    v2_result["common"] = common_pass
+    v2_result["sequence"] = seq_pass
+    v2_result["repeated"] = repeat_pass
+    v2_result["keyboard"] = keyboard_pass
+    v2_result["predictable"] = predictable
+
+    return v2_result
 
 
 def calculate_strength_score(results: dict[str, Any]) -> tuple[str, int]:
-    """Return (classification, core_score) using five visible core criteria.
+    """Return (classification, core_score) using visible core criteria.
 
-    Common passwords are always Very Weak. Predictable sequences/repetition or
-    keyboard walks cap the classification at Weak even if all core checks pass.
-    The numeric score remains the count of the five core criteria; warning checks
-    affect the classification, not the displayed denominator.
+    Compatible with legacy test assertions while integrating v2 classification.
     """
     core_keys = ("length", "uppercase", "lowercase", "numbers", "special")
-    score = sum(bool(results.get(key, False)) for key in core_keys)
+    legacy_score = sum(bool(results.get(key, False)) for key in core_keys)
 
-    if results.get("common", False) or score <= 2:
+    if results.get("common", False) or legacy_score <= 2:
         strength = "Very Weak"
     elif results.get("predictable", False):
         strength = "Weak"
-    elif score == 3:
+    elif legacy_score == 3:
         strength = "Weak"
-    elif score == 4:
+    elif legacy_score == 4:
         strength = "Medium"
     else:
         strength = "Strong"
-    return strength, score
+
+    return strength, legacy_score
 
 
-def display_analysis_report(password: str, results: dict[str, Any], strength: str, score: int) -> None:
-    """Print an analysis report without revealing any part of the password."""
-    print("\n" + "=" * 64)
-    print("                 PASSWORD STRENGTH REPORT")
-    print("=" * 64)
-    print("\nPassword analyzed: [hidden for privacy]")
-    print("\n--- Core checks (5-point score) ---")
+def display_analysis_report(
+    password: str,
+    results: dict[str, Any],
+    strength: str,
+    score: int,
+) -> None:
+    """Print an analysis report without revealing any part of the candidate password."""
+    score_100 = results.get("score", 0)
+    classification_v2 = results.get("classification", strength)
+
+    print("\n" + "=" * 68)
+    print("            SMART PASSWORD SECURITY LAB — ANALYSIS REPORT")
+    print("=" * 68)
+    print("\nCandidate analyzed: [hidden for privacy]")
+    print(f"Unicode code points: {results.get('length_code_points', len(password))}")
+    print(f"Length guidance: {results.get('length_guidance', 'N/A')}")
+
+    print("\n--- Core Composition Checks (5-point legacy score) ---")
     core_checks = (
         ("Minimum 12 characters", "length"),
         ("Uppercase letter (A-Z)", "uppercase"),
@@ -183,61 +162,82 @@ def display_analysis_report(password: str, results: dict[str, Any], strength: st
         ("Punctuation or symbol", "special"),
     )
     for label, key in core_checks:
-        print(f"  [{'PASS' if results.get(key, False) else 'FAIL'}] {label}")
+        status = "PASS" if results.get(key, False) else "FAIL"
+        print(f"  [{status}] {label}")
 
-    print(f"  [{'FAIL' if results.get('common', False) else 'PASS'}] Not a common password")
-    print(f"  [{'WARN' if results.get('predictable', False) else 'PASS'}] No obvious sequence, keyboard walk, or repeated-character pattern")
-    print("\n--- Assessment ---")
-    print(f"  Strength: {strength}")
+    print(f"  [{'FAIL' if results.get('common', False) else 'PASS'}] Not in common passwords or variant")
+    print(f"  [{'WARN' if results.get('predictable', False) else 'PASS'}] No predictable sequence, walk, or repeat")
+
+    # Theoretical Entropy Section
+    entropy_info = results.get("entropy_estimate", {})
+    if entropy_info.get("status") == "CALCULATED":
+        print("\n--- Theoretical Upper-Bound Entropy ---")
+        print(f"  Estimated bit strength: ~{entropy_info.get('bits')} bits (Pool: {entropy_info.get('pool_size')} chars)")
+        print("  Caveat: Assumes uniform random selection. Not human password entropy.")
+    elif entropy_info.get("warning") == "ENTROPY_UNCALIBRATED_UNICODE":
+        print("\n--- Theoretical Entropy ---")
+        print("  Notice: Uncalibrated for non-ASCII characters; score weights renormalized.")
+
+    # Patterns and Penalties
+    penalties = results.get("pattern_penalties", [])
+    if penalties:
+        print("\n--- Pattern Findings & Penalties ---")
+        for item in penalties:
+            print(f"  - [{item.get('rule_id')}]: -{item.get('penalty')} pts ({item.get('description')})")
+
+    print("\n--- Overall Assessment ---")
+    print(f"  Classification: {classification_v2}")
+    print(f"  Heuristic Score: {score_100}/100")
     print(f"  Core score: {score}/5 criteria")
-    print("  Note: This is a heuristic educational assessment, not a guarantee of security.")
-    print("=" * 64)
+    print("  Notice: Heuristic educational model — does not replace breached-password checking.")
+    print("=" * 68)
 
 
 def display_suggestions(results: dict[str, Any], strength: str) -> None:
-    """Print practical, non-invasive advice based on the analysis."""
-    suggestions: list[str] = []
-    if not results.get("length", False):
-        suggestions.append(f"Use at least {MIN_PASSWORD_LENGTH} characters; 15+ is a better target for a password-only login.")
-    if not results.get("uppercase", False):
-        suggestions.append("Consider mixing uppercase and lowercase letters if the service allows it.")
-    if not results.get("lowercase", False):
-        suggestions.append("Consider including lowercase letters if the service allows it.")
-    if not results.get("numbers", False):
-        suggestions.append("Consider including a digit if the service allows it.")
-    if not results.get("special", False):
-        suggestions.append("Consider punctuation or symbols if the service allows them.")
-    if results.get("common", False):
-        suggestions.append("This resembles a common password or variant; choose a completely different one.")
-    if results.get("predictable", False):
-        suggestions.append("Avoid alphabetic/numeric runs, keyboard walks, and repeated characters.")
+    """Print practical, security-conscious recommendations based on findings."""
+    warnings_list = results.get("warnings", [])
+    recommendations = results.get("recommendation_ids", [])
 
-    if not suggestions and strength in ("Strong", "Medium"):
-        print("\nAdvice: Use a unique password for every account and store it in a reputable password manager.")
-        print("A long, randomly generated password or passphrase is generally preferable to predictable substitutions.")
-        return
+    print("\n--- Security Advice & Recommendations ---")
+    if warnings_list:
+        for w in warnings_list:
+            print(f"  [{w.get('severity', 'info').upper()}] {w.get('message')}")
 
-    print("\nSuggestions:")
-    for suggestion in suggestions:
-        print(f"  - {suggestion}")
-    print("  - Never reuse a password across important accounts.")
-    print("  - Prefer a password manager and a long, unique passphrase.")
+    rec_descriptions = {
+        "REC_INCREASE_LENGTH": "Increase password length to at least 12 characters (15+ for critical accounts).",
+        "REC_CONSIDER_15_PLUS": "Consider reaching 15+ characters or adopting a multi-word passphrase.",
+        "REC_CHOOSE_UNRELATED_PHRASE": "Avoid common dictionary words or predictable variants; use distinct words.",
+        "REC_REMOVE_SEQUENCES": "Eliminate sequential characters (e.g. 1234, abcd) across keys.",
+        "REC_REMOVE_REPEATS": "Avoid repeating identical characters consecutively.",
+        "REC_REMOVE_KEYBOARD_WALK": "Avoid adjacent keyboard patterns (e.g. qwerty, asdf).",
+        "REC_REMOVE_YEAR": "Avoid appending four-digit year numbers to base words.",
+        "REC_DIVERSIFY_CASING": "Mix uppercase and lowercase characters where supported.",
+        "REC_INCLUDE_DIGITS": "Include digits in unpredictable positions.",
+        "REC_INCLUDE_SYMBOLS": "Include punctuation or symbols where supported.",
+        "REC_USE_PASSWORD_MANAGER": "Store long, unique passwords in a reputable password manager.",
+    }
+
+    if recommendations:
+        for rid in recommendations:
+            if rid in rec_descriptions:
+                print(f"  * {rec_descriptions[rid]}")
+    else:
+        print("  * Maintain unique passwords across all accounts and use a trusted password manager.")
+    print("  * Enable multi-factor authentication (MFA/2FA) wherever available.\n")
 
 
 def get_user_password() -> str | None:
-    """Read password input without echoing it to the terminal."""
-    print("\n" + "=" * 64)
-    print("                 PASSWORD STRENGTH CHECKER")
-    print("  Local-only educational tool — no network calls or password storage")
-    print("=" * 64)
+    """Read password input without echoing to terminal or logging."""
+    print("\n" + "=" * 68)
+    print("                 SMART PASSWORD SECURITY LAB")
+    print("   Privacy-first educational tool — zero network, zero persistence")
+    print("=" * 68)
     try:
-        # Turn getpass's echo-fallback warning into an error rather than allowing
-        # a password to be typed visibly in terminals that cannot hide input.
         with warnings.catch_warnings():
             warnings.simplefilter("error", getpass.GetPassWarning)
             return getpass.getpass("\nEnter a password to analyze (input hidden): ")
     except getpass.GetPassWarning:
-        print("\nSecure hidden input is unavailable in this terminal. Open a real terminal and try again.")
+        print("\nSecure hidden input is unavailable in this terminal. Open a standard terminal session.")
         return None
     except (EOFError, KeyboardInterrupt):
         print("\nInput cancelled.")
@@ -245,7 +245,33 @@ def get_user_password() -> str | None:
 
 
 def main() -> None:
-    """Run the CLI checker."""
+    """Parse CLI arguments, load optional dictionaries, and run analysis."""
+    parser = argparse.ArgumentParser(
+        description="Smart Password Security Lab — Privacy-First Password Analysis CLI",
+        epilog="Educational tool only. Does not replace breached-password database checks.",
+    )
+    parser.add_argument(
+        "--dictionary",
+        dest="dictionary_path",
+        help="Path to an optional custom dictionary file (.txt, max 1 MiB, max 10,000 entries).",
+    )
+    parser.add_argument(
+        "--json-out",
+        dest="json_out_path",
+        help="Path to write a sanitized, password-free JSON analysis report.",
+    )
+
+    args = parser.parse_args()
+
+    custom_dict: frozenset[str] | None = None
+    if args.dictionary_path:
+        try:
+            custom_dict = core.load_custom_dictionary(args.dictionary_path)
+            print(f"Loaded custom dictionary with {len(custom_dict)} unique entries.")
+        except Exception as err:
+            print(f"Error loading custom dictionary: {err}", file=sys.stderr)
+            sys.exit(1)
+
     password = get_user_password()
     if password is None:
         return
@@ -253,11 +279,21 @@ def main() -> None:
         print("\nNo password entered. Exiting without analysis.")
         return
 
-    results = analyze_password(password)
+    results = analyze_password(password, custom_dict=custom_dict)
     strength, score = calculate_strength_score(results)
+
     display_analysis_report(password, results, strength, score)
     display_suggestions(results, strength)
-    print("\nReminder: do not enter a real password into tools you do not trust.\n")
+
+    if args.json_out_path:
+        try:
+            export_data = core.generate_allowlisted_export(results)
+            with open(args.json_out_path, "w", encoding="utf-8") as f:
+                json.dump(export_data, f, indent=2)
+            print(f"Sanitized password-free report exported to: {args.json_out_path}\n")
+        except Exception as err:
+            print(f"Error writing JSON export: {err}", file=sys.stderr)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
