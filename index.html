@@ -3,383 +3,163 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="color-scheme" content="dark">
-  <title>Password Strength Checker | GP Infinity Nexus</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --page: #080d19;
-      --panel: rgba(17, 25, 43, .94);
-      --panel-soft: #111b2e;
-      --panel-raised: #18243a;
-      --line: #293750;
-      --text: #eef4ff;
-      --muted: #9cabC5;
-      --cyan: #68ddf4;
-      --blue: #8aa8ff;
-      --green: #4be0a0;
-      --yellow: #ffd166;
-      --orange: #ff9f68;
-      --red: #ff6b81;
-      --radius: 22px;
-    }
-
-    * { box-sizing: border-box; }
-    body {
-      min-height: 100vh;
-      margin: 0;
-      padding: 32px 16px;
-      display: grid;
-      place-items: center;
-      color: var(--text);
-      background:
-        radial-gradient(ellipse at 15% 0%, rgba(74, 120, 230, .18), transparent 42%),
-        radial-gradient(ellipse at 95% 100%, rgba(45, 216, 202, .09), transparent 35%),
-        var(--page);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    button, input { font: inherit; }
-    button { -webkit-tap-highlight-color: transparent; }
-    .app { width: min(100%, 760px); }
-    .brand { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 18px; color: var(--muted); font-size: .78rem; letter-spacing: .13em; text-transform: uppercase; }
-    .brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #39516d; border-radius: 11px; color: var(--cyan); background: #13223a; font-size: 1rem; }
-    .panel { padding: clamp(22px, 5vw, 42px); overflow: hidden; border: 1px solid rgba(123, 150, 194, .23); border-radius: var(--radius); background: var(--panel); box-shadow: 0 28px 100px rgba(0, 0, 0, .36); }
-    .eyebrow { margin: 0 0 10px; text-align: center; color: var(--cyan); font-size: .75rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-    h1 { margin: 0; text-align: center; font-size: clamp(1.8rem, 5vw, 2.65rem); line-height: 1.1; letter-spacing: -.045em; }
-    .subtitle { max-width: 520px; margin: 14px auto 28px; color: var(--muted); text-align: center; line-height: 1.65; font-size: .97rem; }
-    .privacy-note { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 24px; padding: 12px 14px; border: 1px solid #264d54; border-radius: 13px; color: #b8f6e4; background: rgba(31, 100, 90, .14); font-size: .84rem; line-height: 1.5; }
-    .privacy-note .lock { flex: 0 0 auto; font-size: 1rem; }
-    label { display: block; margin: 0 0 9px; font-size: .9rem; font-weight: 750; }
-    .input-shell { display: flex; min-width: 0; gap: 8px; padding: 7px; border: 1px solid #35445f; border-radius: 15px; background: #0b1322; transition: border-color .2s, box-shadow .2s; }
-    .input-shell:focus-within { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(104, 221, 244, .12); }
-    input[type="password"], input[type="text"] { min-width: 0; width: 100%; padding: 11px 10px; border: 0; outline: 0; color: var(--text); background: transparent; font-size: 1rem; letter-spacing: .04em; }
-    input::placeholder { color: #72819b; letter-spacing: 0; }
-    .button { min-height: 43px; padding: 10px 15px; border: 1px solid transparent; border-radius: 11px; cursor: pointer; font-weight: 800; font-size: .88rem; transition: transform .16s, background .16s, border-color .16s; }
-    .button:focus-visible { outline: 3px solid rgba(104, 221, 244, .65); outline-offset: 3px; }
-    .button:active { transform: translateY(1px); }
-    .button-secondary { flex: 0 0 auto; color: #dce7fa; border-color: #34445e; background: #18243a; }
-    .button-secondary:hover { background: #22314c; }
-    .button-primary { color: #07121b; background: linear-gradient(100deg, var(--cyan), #90c8ff); }
-    .button-primary:hover { filter: brightness(1.07); }
-    .action-row { display: flex; gap: 10px; margin-top: 12px; }
-    .action-row .button-primary { flex: 1; }
-    .action-row .button-secondary { min-width: 100px; }
-    .microcopy { margin: 10px 0 0; color: var(--muted); font-size: .78rem; line-height: 1.55; }
-    .status { min-height: 1.5em; margin: 10px 0 0; color: var(--yellow); font-size: .84rem; }
-    .result-box { margin-top: 24px; padding: 22px; border: 1px solid var(--line); border-radius: 17px; background: linear-gradient(145deg, rgba(24, 36, 58, .9), rgba(12, 20, 35, .95)); }
-    .result-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
-    .section-label { margin: 0 0 7px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; font-size: .72rem; font-weight: 800; }
-    .strength-name { margin: 0; font-size: clamp(1.35rem, 4vw, 1.8rem); letter-spacing: -.03em; }
-    .strength-name.very-weak { color: var(--red); }
-    .strength-name.weak { color: var(--orange); }
-    .strength-name.medium { color: var(--yellow); }
-    .strength-name.strong { color: var(--green); }
-    .score-chip { flex: 0 0 auto; min-width: 74px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 12px; text-align: center; color: var(--text); background: #0a1220; font-variant-numeric: tabular-nums; }
-    .score-chip strong { display: block; font-size: 1.15rem; }
-    .score-chip span { color: var(--muted); font-size: .7rem; }
-    .meter { height: 9px; margin: 18px 0 10px; overflow: hidden; border-radius: 99px; background: #27344b; }
-    .meter-fill { width: 0; height: 100%; border-radius: inherit; transition: width .24s ease, background .24s ease; }
-    .meter-caption { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: .75rem; }
-    .privacy-result { margin: 16px 0 0; padding: 10px 12px; border-radius: 10px; color: #cbd9ef; background: rgba(7, 13, 25, .62); font-size: .82rem; line-height: 1.5; overflow-wrap: anywhere; }
-    .checks-heading { margin: 24px 0 10px; font-size: 1rem; }
-    .checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
-    .check-item { display: flex; align-items: flex-start; gap: 9px; min-width: 0; padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: rgba(8, 15, 28, .54); color: #ccd7ea; font-size: .82rem; line-height: 1.45; }
-    .check-item.pass { border-color: rgba(75, 224, 160, .25); }
-    .check-item.fail { border-color: rgba(255, 107, 129, .3); }
-    .check-icon { flex: 0 0 auto; font-weight: 900; }
-    .pass .check-icon { color: var(--green); }
-    .fail .check-icon { color: var(--red); }
-    .suggestions { margin-top: 18px; padding: 16px; border: 1px solid #30425d; border-radius: 12px; background: rgba(11, 19, 34, .78); }
-    .suggestions h3 { margin: 0 0 10px; font-size: .98rem; }
-    .suggestions ul { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: #ced8e8; font-size: .86rem; line-height: 1.55; }
-    .suggestions li::marker { color: var(--cyan); }
-    .footer { padding: 18px 10px 0; color: #74839c; text-align: center; font-size: .76rem; line-height: 1.65; }
-    .footer strong { color: #9cacc4; }
-    [hidden] { display: none !important; }
-
-    @media (max-width: 560px) {
-      body { padding: 18px 10px; }
-      .panel { border-radius: 18px; }
-      .input-shell { flex-wrap: wrap; }
-      .input-shell input { flex: 1 1 100%; padding: 13px 10px; }
-      .input-shell .button { flex: 1; }
-      .checks { grid-template-columns: 1fr; }
-      .result-box { padding: 16px; }
-      .action-row { flex-wrap: wrap; }
-      .action-row .button { flex: 1 1 100%; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
-    }
-  </style>
+  <title>Smart Password Security Lab</title>
+  <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
-  <main class="app">
-    <div class="brand" aria-label="Project branding"><span class="brand-mark" aria-hidden="true">⌁</span><span>GP Infinity Nexus · Security Lab</span></div>
-    <section class="panel" aria-labelledby="pageTitle">
-      <p class="eyebrow">Personal security utility</p>
-      <h1 id="pageTitle">Password Strength Checker</h1>
-      <p class="subtitle">Check common password risks, basic composition, and predictable patterns before choosing a unique password.</p>
+  <div class="container">
+    <header class="brand" aria-label="Application header">
+      <span class="brand-icon" aria-hidden="true">⌁</span>
+      <span>GPS Officials · Smart Password Security Lab</span>
+    </header>
 
-      <p class="privacy-note"><span class="lock" aria-hidden="true">▣</span><span><strong>Local-only analysis.</strong> This page contains no external scripts, network requests, password storage, or analytics. Your password stays in this browser tab.</span></p>
+    <main class="main-card">
+      <p class="card-eyebrow">Privacy-First Cybersecurity Laboratory</p>
+      <h1>Smart Password Security Lab</h1>
+      <p class="subtitle">
+        Evaluate candidate passwords using explainable hybrid heuristic scoring, pattern detection,
+        and offline dictionary analysis without network exposure.
+      </p>
 
-      <label for="password">Password to analyze</label>
+      <div class="privacy-banner" role="note" aria-label="Privacy guarantee">
+        <span class="icon" aria-hidden="true">🔒</span>
+        <div>
+          <strong>Local-Only Client Analysis:</strong> Passwords are processed strictly in this browser tab.
+          Zero network calls, zero tracking analytics, zero cookies, and zero local persistence.
+        </div>
+      </div>
+
+      <div class="field-label">
+        <label for="passwordInput">Password or Passphrase to Analyze</label>
+      </div>
+
       <div class="input-shell">
-        <input id="password" name="password" type="password" placeholder="Enter a password" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="inputHelp status" maxlength="1024">
-        <button class="button button-secondary" id="toggleButton" type="button" aria-pressed="false" aria-label="Show password">Show</button>
+        <input
+          id="passwordInput"
+          name="password"
+          type="password"
+          placeholder="Type or paste a password"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          aria-describedby="statusAnnouncer"
+          maxlength="1024"
+        >
+        <button id="toggleVisibilityBtn" class="btn-secondary" type="button" aria-pressed="false" aria-label="Show password characters">
+          Show
+        </button>
       </div>
-      <div class="action-row">
-        <button class="button button-primary" id="checkButton" type="button">Analyze password</button>
-        <button class="button button-secondary" id="clearButton" type="button">Clear</button>
+
+      <div class="button-bar">
+        <button id="analyzeBtn" class="btn-accent" type="button">Analyze</button>
+        <button id="clearBtn" class="btn-secondary" type="button">Clear</button>
+        <button id="clearAllBtn" class="btn-danger" type="button">Clear All</button>
+        <button id="exportJsonBtn" class="btn-secondary" type="button">Export JSON</button>
+        <button id="printPdfBtn" class="btn-secondary" type="button">Print / PDF</button>
       </div>
-      <p class="microcopy" id="inputHelp">Typing updates the estimate automatically. The score checks five basic criteria; common or predictable patterns can lower the final rating.</p>
-      <p class="status" id="status" role="status" aria-live="polite"></p>
 
-      <section class="result-box" id="resultBox" aria-labelledby="resultTitle" hidden>
-        <div class="result-heading">
-          <div>
-            <p class="section-label" id="resultTitle">Assessment</p>
-            <h2 class="strength-name very-weak" id="strengthText">Very Weak</h2>
-          </div>
-          <div class="score-chip" aria-label="Core criteria score"><strong id="scoreText">0/5</strong><span>core checks</span></div>
-        </div>
-        <div class="meter" role="progressbar" id="meter" aria-label="Estimated strength rating" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div class="meter-fill" id="progressBar"></div>
-        </div>
-        <div class="meter-caption"><span>Estimated rating</span><span id="meterLabel">Waiting for input</span></div>
-        <p class="privacy-result" id="maskedPassword">Password contents are never displayed here.</p>
+      <div id="statusAnnouncer" class="status-message" role="status" aria-live="polite"></div>
 
-        <h3 class="checks-heading">Security checks</h3>
-        <ul class="checks" id="checksList"></ul>
-        <div class="suggestions" id="suggestionsBox" aria-live="polite">
-          <h3>Suggestions</h3>
-          <ul id="suggestionsList"></ul>
+      <!-- Custom Dictionary Upload -->
+      <section class="custom-dict-panel" aria-label="Custom Dictionary Options">
+        <div class="custom-dict-header">
+          <strong>Optional Custom Dictionary</strong>
+          <span class="dict-badge" id="dictBadge" hidden>No custom dictionary</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px;">
+          Upload a local UTF-8 .txt wordlist (max 1 MiB, max 10,000 entries) to test proprietary terms or names in memory only.
+        </p>
+        <div class="custom-dict-controls">
+          <label class="button btn-secondary file-input-wrapper">
+            Choose Wordlist (.txt)
+            <input type="file" id="dictFileInput" accept=".txt,text/plain" aria-label="Upload custom dictionary text file">
+          </label>
+          <button id="clearDictBtn" class="btn-secondary" type="button" hidden>Remove Dictionary</button>
         </div>
       </section>
-    </section>
-    <footer class="footer"><strong>Educational tool only.</strong> This heuristic cannot confirm whether a password has appeared in a breach or guarantee that it is safe. Prefer long, unique passwords and use a trusted password manager.</footer>
-  </main>
 
-  <script>
-    "use strict";
+      <!-- Analysis Results Card -->
+      <section id="resultsCard" class="results-card" aria-label="Password Security Assessment" hidden>
+        <div class="results-header">
+          <div>
+            <p class="classification-label">Security Assessment</p>
+            <h2 id="classificationTitle" class="classification-title very-weak">Very Weak</h2>
+          </div>
+          <div class="score-badge" aria-label="Heuristic Score">
+            <span id="scoreValue" class="score-value">0</span>
+            <span class="score-label">Score / 100</span>
+          </div>
+        </div>
 
-    const MIN_PASSWORD_LENGTH = 12;
-    const commonPasswords = new Set([
-      "123456", "password", "12345678", "qwerty", "123456789", "12345",
-      "1234", "111111", "1234567", "dragon", "123123", "baseball",
-      "iloveyou", "trustno1", "sunshine", "master", "welcome", "shadow",
-      "ashley", "football", "jesus", "michael", "ninja", "mustang",
-      "password1", "password123", "admin", "letmein", "monkey", "access",
-      "hello", "charlie", "donald", "princess", "qwerty123", "admin123",
-      "root", "toor", "pass", "test", "guest", "master123", "changeme",
-      "orange", "secret", "123qwe", "zxcvbn", "1234567890", "password12", "login"
-    ]);
-    const commonBases = ["password", "admin", "qwerty", "welcome", "letmein", "iloveyou", "monkey", "dragon", "login", "changeme", "master", "guest"];
-    const keyboardPatterns = ["qwerty", "asdf", "zxcv", "qwer", "wasd", "1qaz", "zaq1"];
+        <div class="meter-track" role="progressbar" id="meterProgress" aria-label="Strength score" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="meterFill" class="meter-fill"></div>
+        </div>
+        <div class="meter-meta">
+          <span>Explainable Hybrid Heuristic</span>
+          <span id="meterLabel">Waiting for analysis</span>
+        </div>
 
-    const passwordInput = document.getElementById("password");
-    const toggleButton = document.getElementById("toggleButton");
-    const checkButton = document.getElementById("checkButton");
-    const clearButton = document.getElementById("clearButton");
-    const resultBox = document.getElementById("resultBox");
-    const statusText = document.getElementById("status");
-    const strengthText = document.getElementById("strengthText");
-    const scoreText = document.getElementById("scoreText");
-    const progressBar = document.getElementById("progressBar");
-    const meter = document.getElementById("meter");
-    const meterLabel = document.getElementById("meterLabel");
-    const checksList = document.getElementById("checksList");
-    const suggestionsList = document.getElementById("suggestionsList");
-    const maskedPassword = document.getElementById("maskedPassword");
+        <div id="lengthPill" class="length-guidance-pill">Length guidance</div>
 
-    function passwordLength(password) {
-      return Array.from(password).length;
-    }
+        <h3 class="section-title">Core Character Diversity (Diagnostics)</h3>
+        <div id="criteriaGrid" class="criteria-grid"></div>
 
-    function checkLength(password) { return passwordLength(password) >= MIN_PASSWORD_LENGTH; }
-    function checkUppercase(password) { return /[A-Z]/.test(password); }
-    function checkLowercase(password) { return /[a-z]/.test(password); }
-    function checkNumbers(password) { return /[0-9]/.test(password); }
-    function checkSpecialCharacters(password) { return /[^A-Za-z0-9\s]/u.test(password); }
+        <div id="penaltiesSection" hidden>
+          <h3 class="section-title">Pattern Findings & Penalties</h3>
+          <ul id="penaltiesList" class="penalty-list"></ul>
+        </div>
 
-    function checkCommonPasswords(password) {
-      const lowered = password.toLowerCase();
-      const compact = lowered.replace(/[^a-z0-9]/g, "");
-      const leet = lowered.replace(/[@$013457]/g, (character) => ({ "@": "a", "$": "s", "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t" })[character]).replace(/[^a-z0-9]/g, "");
-      if (commonPasswords.has(lowered) || commonPasswords.has(compact) || commonPasswords.has(leet)) return true;
-      return [compact, leet].some((candidate) => commonBases.some((root) => new RegExp("^" + root + "[0-9]{0,4}$").test(candidate)));
-    }
+        <details class="entropy-box">
+          <summary id="entropySummary">Theoretical Upper-Bound Entropy</summary>
+          <p id="entropyDetails" class="details-body"></p>
+        </details>
 
-    function checkSequentialPatterns(password, minimumRun = 4) {
-      const compact = password.toLowerCase().replace(/[^a-z0-9]/g, "");
-      let runLength = 1;
-      let previousDelta = 0;
-      for (let i = 1; i < compact.length; i += 1) {
-        const previous = compact[i - 1];
-        const current = compact[i];
-        const sameType = (/[a-z]/.test(previous) && /[a-z]/.test(current)) || (/[0-9]/.test(previous) && /[0-9]/.test(current));
-        const delta = sameType ? current.charCodeAt(0) - previous.charCodeAt(0) : 0;
-        if (sameType && (delta === 1 || delta === -1) && (previousDelta === 0 || delta === previousDelta)) runLength += 1;
-        else runLength = 1;
-        previousDelta = sameType && (delta === 1 || delta === -1) ? delta : 0;
-        if (runLength >= minimumRun) return true;
-      }
-      return false;
-    }
+        <h3 class="section-title">Security Recommendations</h3>
+        <ul id="recommendationsList" class="rec-list"></ul>
+      </section>
 
-    function checkRepeatedCharacters(password, minimumRun = 4) {
-      return new RegExp("(.)\\1{" + (minimumRun - 1) + ",}", "su").test(password);
-    }
+      <!-- Educational Learning Mode -->
+      <section class="learning-card" aria-label="Learning Mode">
+        <h3 style="font-size: 1.05rem; margin-bottom: 6px;">Interactive Learning Mode</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.55;">
+          Explore real-world security concepts using synthetic test cases. Click any example below to observe how the scoring engine detects patterns and applies severity caps:
+        </p>
 
-    function checkKeyboardPatterns(password) {
-      const compact = password.toLowerCase().replace(/[^a-z0-9]/g, "");
-      return keyboardPatterns.some((pattern) => compact.includes(pattern));
-    }
+        <div class="learning-examples">
+          <button class="example-btn" type="button" data-sample="password123">
+            <span class="example-title">Short & Common</span>
+            <span class="example-caption">password123 · Common variant cap</span>
+          </button>
+          <button class="example-btn" type="button" data-sample="Tiger!Qwerty2026">
+            <span class="example-title">Keyboard Walk</span>
+            <span class="example-caption">Tiger!Qwerty2026 · Walk penalty</span>
+          </button>
+          <button class="example-btn" type="button" data-sample="Abcd1234!!!!">
+            <span class="example-title">Sequence & Repeats</span>
+            <span class="example-caption">Abcd1234!!!! · Compounding runs</span>
+          </button>
+          <button class="example-btn" type="button" data-sample="Correct-Horse-Battery-Staple-2026!">
+            <span class="example-title">Robust Passphrase</span>
+            <span class="example-caption">Multi-word · 35 chars, uncapped</span>
+          </button>
+        </div>
 
-    function analyzePassword(password) {
-      const sequence = checkSequentialPatterns(password);
-      const repeated = checkRepeatedCharacters(password);
-      const keyboard = checkKeyboardPatterns(password);
-      return {
-        length: checkLength(password),
-        uppercase: checkUppercase(password),
-        lowercase: checkLowercase(password),
-        numbers: checkNumbers(password),
-        special: checkSpecialCharacters(password),
-        common: checkCommonPasswords(password),
-        sequence,
-        repeated,
-        keyboard,
-        predictable: sequence || repeated || keyboard
-      };
-    }
+        <div id="learnExplanation" class="edu-callout" hidden></div>
+      </section>
+    </main>
 
-    function calculateStrength(results) {
-      const coreKeys = ["length", "uppercase", "lowercase", "numbers", "special"];
-      const score = coreKeys.reduce((sum, key) => sum + (results[key] ? 1 : 0), 0);
-      let strength;
-      if (results.common || score <= 2) strength = "Very Weak";
-      else if (results.predictable || score === 3) strength = "Weak";
-      else if (score === 4) strength = "Medium";
-      else strength = "Strong";
-      return { strength, score };
-    }
+    <footer>
+      <p>
+        <strong>Educational Heuristic Tool:</strong> This model provides rule-based estimates and does not replace
+        breached-password screening (e.g. k-Anonymity services) or guarantee defense against targeted compromise.
+        Always prefer long, unique passphrases managed in a trusted password manager with Multi-Factor Authentication (MFA).
+      </p>
+    </footer>
+  </div>
 
-    function getStrengthClass(strength) {
-      return strength.toLowerCase().replaceAll(" ", "-");
-    }
-
-    function getStrengthPresentation(strength) {
-      const presentation = {
-        "Very Weak": { progress: 15, color: "var(--red)" },
-        "Weak": { progress: 38, color: "var(--orange)" },
-        "Medium": { progress: 68, color: "var(--yellow)" },
-        "Strong": { progress: 100, color: "var(--green)" }
-      };
-      return presentation[strength] || presentation["Very Weak"];
-    }
-
-    function appendCheck(label, passed, detail = "") {
-      const item = document.createElement("li");
-      item.className = "check-item " + (passed ? "pass" : "fail");
-      const icon = document.createElement("span");
-      icon.className = "check-icon";
-      icon.setAttribute("aria-hidden", "true");
-      icon.textContent = passed ? "✓" : "!";
-      const message = document.createElement("span");
-      message.textContent = detail ? label + " — " + detail : label + (passed ? ": Pass" : ": Needs attention");
-      item.append(icon, message);
-      checksList.appendChild(item);
-    }
-
-    function appendSuggestion(message) {
-      const item = document.createElement("li");
-      item.textContent = message;
-      suggestionsList.appendChild(item);
-    }
-
-    function buildSuggestions(results, strength) {
-      suggestionsList.replaceChildren();
-      const suggestions = [];
-      if (!results.length) suggestions.push("Use at least 12 characters; 15 or more is a useful target for a password-only sign-in.");
-      if (!results.uppercase) suggestions.push("Consider adding an uppercase letter if the service permits it.");
-      if (!results.lowercase) suggestions.push("Consider adding a lowercase letter if the service permits it.");
-      if (!results.numbers) suggestions.push("Consider adding a digit if the service permits it.");
-      if (!results.special) suggestions.push("Consider punctuation or a symbol if the service permits it.");
-      if (results.common) suggestions.push("Choose a completely different password; changing case or adding punctuation is not enough.");
-      if (results.sequence) suggestions.push("Remove alphabetic or numeric sequences such as abcd or 1234.");
-      if (results.repeated) suggestions.push("Avoid repeating the same character several times in a row.");
-      if (results.keyboard) suggestions.push("Avoid keyboard walks such as qwerty or asdf.");
-      if (suggestions.length === 0 && (strength === "Strong" || strength === "Medium")) {
-        suggestions.push("Use a different unique password for every account.");
-        suggestions.push("Store long, randomly generated passwords in a trusted password manager.");
-      }
-      suggestions.push("Never reuse a password across important accounts; enable multi-factor authentication where available.");
-      suggestions.forEach(appendSuggestion);
-    }
-
-    function renderAnalysis(password, announce = false) {
-      if (password.length === 0) {
-        resultBox.hidden = true;
-        statusText.textContent = announce ? "Enter a password to analyze." : "";
-        return;
-      }
-
-      const results = analyzePassword(password);
-      const { strength, score } = calculateStrength(results);
-      const presentation = getStrengthPresentation(strength);
-      resultBox.hidden = false;
-      strengthText.textContent = strength;
-      strengthText.className = "strength-name " + getStrengthClass(strength);
-      scoreText.textContent = score + "/5";
-      progressBar.style.width = presentation.progress + "%";
-      progressBar.style.background = presentation.color;
-      meter.setAttribute("aria-valuenow", String(presentation.progress));
-      meterLabel.textContent = strength;
-      maskedPassword.textContent = "Password hidden for privacy · " + passwordLength(password) + " characters";
-      checksList.replaceChildren();
-      appendCheck("At least 12 characters", results.length);
-      appendCheck("Contains uppercase letter", results.uppercase);
-      appendCheck("Contains lowercase letter", results.lowercase);
-      appendCheck("Contains a digit", results.numbers);
-      appendCheck("Contains punctuation or a symbol", results.special);
-      appendCheck("Not a common password or obvious variant", !results.common);
-      appendCheck("No predictable pattern detected", !results.predictable,
-        results.predictable ? "pattern warning lowers the rating" : "no obvious sequence, keyboard walk, or repeated run");
-      buildSuggestions(results, strength);
-      statusText.textContent = announce ? "Analysis updated." : "";
-    }
-
-    passwordInput.addEventListener("input", () => renderAnalysis(passwordInput.value, false));
-    checkButton.addEventListener("click", () => {
-      if (passwordInput.value.length === 0) {
-        resultBox.hidden = true;
-        statusText.textContent = "Enter a password before running the analysis.";
-        passwordInput.focus();
-        return;
-      }
-      renderAnalysis(passwordInput.value, true);
-    });
-    toggleButton.addEventListener("click", () => {
-      const showing = passwordInput.type === "password";
-      passwordInput.type = showing ? "text" : "password";
-      toggleButton.textContent = showing ? "Hide" : "Show";
-      toggleButton.setAttribute("aria-pressed", String(showing));
-      toggleButton.setAttribute("aria-label", showing ? "Hide password" : "Show password");
-      passwordInput.focus();
-    });
-    clearButton.addEventListener("click", () => {
-      passwordInput.value = "";
-      passwordInput.type = "password";
-      toggleButton.textContent = "Show";
-      toggleButton.setAttribute("aria-pressed", "false");
-      toggleButton.setAttribute("aria-label", "Show password");
-      resultBox.hidden = true;
-      statusText.textContent = "Password cleared from this page.";
-      passwordInput.focus();
-    });
-  </script>
+  <script src="assets/js/analyzer.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>
